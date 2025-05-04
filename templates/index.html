@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CyberNex Sentinel AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 100px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #222;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background: #fff;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #003d80;
+        }
+
+        #loading {
+            display: none;
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        #answer {
+            width: 500px;
+            text-align: left;
+            font-size: 18px;
+            color: #333;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CyberNex Sentinel AI</h1>
+
+    <form id="ask-form">
+        <input type="text" id="question" placeholder="Ask a cybersecurity question..." required>
+        <button type="submit">Ask</button>
+    </form>
+
+    <div id="loading">Thinking<span id="dots"></span></div>
+    <div id="answer"></div>
+
+    <script>
+        const form = document.getElementById('ask-form');
+        const questionInput = document.getElementById('question');
+        const answerDiv = document.getElementById('answer');
+        const loadingDiv = document.getElementById('loading');
+        const dotsSpan = document.getElementById('dots');
+
+        let dotsInterval;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            answerDiv.innerText = "";
+            loadingDiv.style.display = 'block';
+            startDotsAnimation();
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    loadingDiv.style.display = 'none';
+                    stopDotsAnimation();
+                    typeWriterEffect(data.answer);
+                } else {
+                    loadingDiv.style.display = 'none';
+                    stopDotsAnimation();
+                    answerDiv.innerText = "Error: Could not get a response.";
+                }
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                stopDotsAnimation();
+                answerDiv.innerText = "Error: Failed to reach the server.";
+            }
+        });
+
+        function typeWriterEffect(text) {
+            let index = 0;
+            answerDiv.innerText = '';
+
+            function type() {
+                if (index < text.length) {
+                    answerDiv.innerText += text.charAt(index);
+                    index++;
+                    setTimeout(type, 15); // Typing speed in ms
+                }
+            }
+
+            type();
+        }
+
+        function startDotsAnimation() {
+            let dotCount = 0;
+            dotsInterval = setInterval(() => {
+                dotCount = (dotCount + 1) % 4;
+                dotsSpan.innerText = '.'.repeat(dotCount);
+            }, 500);
+        }
+
+        function stopDotsAnimation() {
+            clearInterval(dotsInterval);
+            dotsSpan.innerText = '';
+        }
+    </script>
+
+</body>
+</html>
