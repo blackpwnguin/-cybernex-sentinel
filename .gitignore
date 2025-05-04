@@ -1,0 +1,17 @@
+# Python & build artefacts
+__pycache__/
+*.py[cod]
+venv/
+*.egg-info/
+dist/
+build/
+
+# Large native libs / models
+*.dylib
+*.so
+*.faiss
+*.gguf
+models/
+
+# macOS cruft
+.DS_Store
